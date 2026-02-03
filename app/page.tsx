@@ -1,65 +1,107 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import SuccessView from "@/components/SuccessView";
+import { Heart } from "lucide-react";
 
 export default function Home() {
+  const [isAccepted, setIsAccepted] = useState(false);
+  const [noBtnPosition, setNoBtnPosition] = useState({ top: "50%", left: "60%" }); // Initial rough position
+  const [isBtnAbsolute, setIsBtnAbsolute] = useState(false);
+  const [textIndex, setTextIndex] = useState(0);
+
+  const niceTexts = [
+    "No",
+    "Are you sure?",
+    "Really sure?",
+    "Think again!",
+    "Last chance!",
+    "Surely not?",
+    "You might regret this!",
+    "Give it another thought!",
+    "Are you absolutely certain?",
+    "This could be a mistake!",
+    "Have a heart!",
+    "Don't be so cold!",
+    "Change of heart?",
+    "Wouldn't you reconsider?",
+    "Is that your final answer?",
+    "You're breaking my heart ;(",
+  ];
+
+  const controls = useAnimation();
+
+  const handleNoHover = () => {
+    // Switch to absolute positioning on first hover if not already
+    if (!isBtnAbsolute) {
+      setIsBtnAbsolute(true);
+    }
+
+    // Calculate random position
+    // We want to avoid the edges so the button doesn't get clipped
+    const x = Math.random() * (window.innerWidth - 100);
+    const y = Math.random() * (window.innerHeight - 50);
+
+    setNoBtnPosition({ top: `${y}px`, left: `${x}px` });
+
+    // Cycle text
+    setTextIndex((prev) => (prev + 1) % niceTexts.length);
+  };
+
+  const handleYesClick = () => {
+    setIsAccepted(true);
+  };
+
+  if (isAccepted) {
+    return <SuccessView />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden relative">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center gap-8 max-w-md w-full"
+      >
+        <div className="relative">
+          <Heart className="w-32 h-32 text-red-500 fill-red-500 animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-xl">
+            ?
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <h1 className="font-pacifico text-4xl md:text-6xl text-center text-red-600 drop-shadow-sm">
+          Will you be my Valentine?
+        </h1>
+
+        <div className="flex flex-row items-center justify-center gap-8 w-full mt-4 h-24 relative">
+          {/* Yes Button */}
+          <button
+            onClick={handleYesClick}
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform transition hover:scale-110 z-10"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Yes 🥰
+          </button>
+
+          {/* No Button */}
+          <motion.button
+            onClick={handleNoHover} // just in case they manage to click it
+            onMouseEnter={handleNoHover}
+            onTouchStart={handleNoHover} // Handle mobile touch
+            animate={isBtnAbsolute ? noBtnPosition : {}}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            style={{
+              position: isBtnAbsolute ? "fixed" : "static",
+              // If static, we occupy space in the flex row. If fixed, we fly around.
+            }}
+            className={`bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg whitespace-nowrap z-50 ${isBtnAbsolute ? 'bg-red-500' : ''}`}
           >
-            Documentation
-          </a>
+            {niceTexts[textIndex]}
+          </motion.button>
         </div>
-      </main>
+      </motion.div>
     </div>
   );
 }
